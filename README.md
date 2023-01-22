@@ -19,6 +19,8 @@
     
   
   Страница Логин:
+  
+  
       if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm(csrf_enabled=False)
