@@ -1,0 +1,114 @@
+from flask import Flask, url_for, request, send_file, redirect, abort
+
+app = Flask(__name__)  # отправная точка
+#send_file - позволяет отправлять пользователю в ответ локальные файлы
+# redirect - возвращает обьект ответа и перенаправляет пользователя по другому адресу
+
+
+
+#app.run(host, port, debug, optional)
+#host-127.0.0.1(localhost)
+#host- 0.0.0.0 - адрес в мир
+#port - 5000
+
+##### Создание декораторов
+#app.route(rule, options) -- маршрутизация с помощью декораторов и патернов
+
+
+# декоратор app.route сщздал связь между адресом и функцией просмотра
+# при указании 2-х декораторов- можно просматривать информацию по двум адресам
+@app.route('/')
+@app.route('/index')
+def main_page():
+    return 'Привет Мир'
+
+
+# <name> -- передаем имя,которое моожет динамически изменяться и отвечать за логику запроса
+@app.route('/hello/<name>')
+def hello_name(name):
+    return "Привет, %s" % name
+
+# возвращает id каталога
+@app.route('/catalog/<int:item_id>')
+def catalog_item(item_id):
+    return "Номер в каталоге: %d" % item_id
+
+
+# возвращает версию
+@app.route('/versions/<float:version>')
+def versions(version):
+    return "Номер версии: %f" % version
+
+
+@app.route('/path1/')      #есть завершающий "/" - канонический URL -- показывает путь в папке
+def path1():
+    return "Это маршрут 1"
+
+@app.route('/path2')      # нет завершающего "/" - показывает путь к файлу
+def path2():
+    return "Это маршрут 2"
+
+
+# url_for - нужен для переадресации адреса на другую страницу
+@app.route('/url_for-test')
+def url_for_test():
+    return url_for('main_page')
+
+
+# Просмотр страницы Логин
+@app.route('/login.html')
+def send_login():                       # функция просмотра страницы,будет отправлять файл login.html при запросе к этому адресу
+    return send_file('login.html')
+
+
+# Передавать статичные файлы можно не только через send_file, а также через url_for
+# url_for('static',filename='static.html')
+
+
+###################################################
+# Добавим обработчик,чтобы посомтреть как flask - обрабатывает запросы ,переданные различными методами
+@app.route('/login', methods= ['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        user = request.form['name']  # рисвоить имя - name - из html шаблона
+        return "Запрос методом POST, переданное значение: %s" % user
+    else:
+        user = request.args.get('name')
+        return "Запрос методом GET, переданное значение: %s" % user
+
+
+
+# атрибуты метода Get - передаются через адресную строку
+# атрибуты метода Post - передаются через тело html
+
+
+
+##################################################################
+# Использование redirect ( возвращает обьект ответа + изменяет маршрут)
+# redirect(location, statuscode, response)
+
+@app.route('/redirect-to-login-page')
+def redirected():
+    return redirect(url_for('send_login'))
+
+# функция abort- будет возвращать код статуса redirect = 401( что говорит о том,что пользователь не аудентифицирован)
+@app.route('/aborted-page')
+def aborted_page():
+    abort(401)
+    this_is_never_executed()
+
+
+# Обработчик ошибок для кода 404
+@app.errorhandler(404)
+def page_not_found(error):
+    return "Такой страницы не существует", 404
+
+if __name__ == "__main__":
+    with app.test_request_context():     # принудительное выполнение запросов
+        print(url_for('main_page'))
+        print(url_for('path1'))
+        print(url_for('path2'))
+    app.run(port=8080)
+
+
+# url_for - нужен для:

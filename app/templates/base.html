@@ -1,0 +1,31 @@
+    <html>
+        <head>
+            {# Info_comment #}
+            {% if title %}
+            <title>{{ title }} - Flask App</title>
+            {% else %}
+            <title>Flask App</title>
+            {% endif %}
+        </head>
+        <body>
+            <div>Flask_app:
+                <a href="{{ url_for('index') }}">Домашняя страница</a>
+                {% if current_user.is_anonymous %}
+                <a href="{{ url_for('login') }}">Вход</a>
+                {% else %}
+                <a href="{{ url_for('logout') }}">Выход</a>
+                {% endif %}
+            </div>
+            <hr>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </body>
+    </html>
